@@ -8,6 +8,11 @@
     2. [Console](#account-console)
     3. [Billing Alarm](#account-billing)
 3. [Identity and Access Management (IAM)](#iam)
+    1. [Principals](#iam-principals)
+    2. [Users and Groups](#account-console)
+    3. [Policies](#account-billing)
+    4. [Roles](#account-billing)
+    5. [IAM setup](#iam-setup)
 3. [end](#iam)
 
 <div id='intro'/></div>
@@ -200,6 +205,165 @@ We can then add the name and the description of the alarm. Our alarm is finally 
 <div id='iam'/></div>
 
 # Identity and Access Management (IAM)
+
+IAM is a powerful service that allows you to control how people and programs are allowed to
+manipulate our AWS services. IAM uses traditional identity concepts such as users,
+groups, and access control policies to control who can use your AWS account, what services
+and resources they can use, and how they can use them
+
+We can create an AWS user and allow/restrict access to specific AWS services. 
+
+IAM is not linked to permissions within applications but the ones to access AWS ressources. IAM is a global service, all the access/restrictions are global.
+
+The usage of IAM is free !
+
+<div id='iam-principals'/></div>
+
+## Principals
+
+The first IAM concept to understand is **principals**. A principal is an IAM entity that is allowedto interact with AWS resources.
+
+A principal can be permanent or temporary, and it can represent a human or an application. There are three types of principals: **root users**, **IAM users**, and **roles/temporary security tokens**.
+
+### Root User
+
+When you first create an AWS account, you begin with only a single sign-in principal that has
+complete access to all AWS Cloud services and resources in the account. This principal is
+called the root user. As long as you have an open account with AWS, the root user for that
+relationship will persist.
+
+Their access cannot be limited.
+
+### IAM Users
+
+IAM Users are persistent identities set up through the IAM service to represent individual people or applications. They are often used to differenciate admin, dev, test, and production users accesses for applications that need AWS.
+
+Any new user account created are not given access to any AWS ressources. We must explicitely grant persmission to user to give him access to resources.
+
+Their access is controled by policies.
+
+### Roles and Temporary security tokens
+
+Roles and temporary security tokens are very important for advanced IAM usage, but many
+AWS users find them confusing. Roles are used to grant specific privileges to specific actors
+for a set duration of time. 
+
+Roles grants access from one service to another.
+Using IAM roles for Amazon EC2 removes the need to store AWS credentials in a configuration file
+
+Their access are controled by limited-in-time policies. 
+
+<div id='iam-setup'/></div>
+
+## Initial setup and configuration
+
+AWS best practices allows us to keep a high level of security, accessibility and efficiency. In the IAM panel we can see AWS recommends to do 5 tasks.
+
+<p align="center">
+<img src="AWS_CSAA_imgs/iam_best_practices.png" width="500">
+</p>
+
+### Multi factor authentication
+
+Multi factor authentication provides another security level on the root acccount. That security is provided by a third-party, it provides a continually changing, random, 6 digit code the we will need to input along with our password when we log in to our root account.
+
+There are two types of MFA devices. The first is a virtual MFA device. It can be a smartphone or a tablet and we use an application like google authentificator to generate the 6-digit code. The second one is an hardware key fob, it's a small physical device with a display we can attach to our keychain. You can get it directly from AWS.
+
+How MFA works ?
+
+When you want to login to an application, after entering the login and password you will have to enter the a MFA code which is sent to the MFA device or to the hardware MFA device. After entering the code, we are logged in to our AWS account.
+
+To set MFA, we click on Manage MFA device with virtual MFA device. Then we have to install an AWS compatible MFA virtual software (authy or google authentificator).
+
+### Create individual IAM users
+
+AWS recommands we don't use our root account for day to day administrative tasks. For that, we are going to create a new IAM user and attach administrative access policy to it. as best practice AWS recommends we give users the minimum access to ressources for users to accomplish their day to day tasks.
+
+To create a user we go in the dashboard into the `users` section, then `add user`.
+
+<p align="center">
+<img src="AWS_CSAA_imgs/add_user1.png" width="500">
+</p>
+
+We can enter the name of the new user. We have to select an access type. We select both `Programmatic access` and `AWS Management Console access`. Accesses will be seen later.
+We can then select an automatically generated password or custom password (here a custom password is used) we can force the change of the password when the user logs in.
+
+The second step is to set permissions for the new user. For the first user we are going to attach an `AdministratorAccess` policy (which gives the user a full access to all AWS services).
+
+Then a tag can be added to the user (optionnal). The last step reviews all the options set for the user. The user is finally created !
+
+<p align="center">
+<img src="AWS_CSAA_imgs/add_user2.png" width="500">
+</p>
+
+### Create group to assign permission
+
+In the IAM dashboard we can go into `Groups`. We create a new group "OmegaAdmins". Then we have to attach an `AdministratorAccess` policy for the group, as we previously did for the user.
+
+### Apply IAM password policy
+
+The last step is to setup an IAM password policy. It dictates the format and expiration rules for passwords.
+
+<p align="center">
+<img src="AWS_CSAA_imgs/iam_password_policy.png" width="500">
+</p>
+
+We are going to click on `prevent password reuse` and set the number of passwords to be remembered to 3.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
