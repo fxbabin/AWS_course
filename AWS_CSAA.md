@@ -9,10 +9,10 @@
     3. [Billing Alarm](#account-billing)
 3. [Identity and Access Management (IAM)](#iam)
     1. [Principals](#iam-principals)
-    2. [Users and Groups](#account-console)
-    3. [Policies](#account-billing)
-    4. [Roles](#account-billing)
-    5. [IAM setup](#iam-setup)
+    2. [Policies](#iam-policies)
+    3. [Users and Groups](#iam-users-groups)
+    4. [Roles](#iam-roles)
+    5. [Multi Factor Authentification (MFA)](#iam-mfa)
 3. [end](#iam)
 
 <div id='intro'/></div>
@@ -62,7 +62,7 @@ Whereas using the cloud, the infrastructure can be scaled to fit the need of the
 
 As seen previously, Cloud computing has some real benefits :
 * **variable expense** : we don't need to invest in huge data centers you may not use. You pay for how much you consume !
-* **available in minutes** : new IT ressources can be accessed within minutes.
+* **available in minutes** : new IT resources can be accessed within minutes.
 * **economies of scale** : because of the number of users. Cloud providers can achieve higher economies of scale translating in lower prices.
 * **global in minutes** : cloud architectures can be deployed really easily all around the world.
 
@@ -114,7 +114,7 @@ Organizations retain complete control and ownership over the region in which the
 
 ## AWS account creation
 
-When we create a new account on AWS, we have an AWS Free Tier. It allows us to use some of AWS ressources for free each month during one year.
+When we create a new account on AWS, we have an AWS Free Tier. It allows us to use some of AWS resources for free each month during one year.
 
 In order to create an AWS account, we must go to the following address [aws.amazon.com](aws.amazon.com).
 
@@ -133,7 +133,7 @@ We choose a `personnal` account type and fill the rest of the forms.
 
 Then we choose the `basic plan`, which is free.
 
-To connect to aws we use our email and password. We will then access to your root account. The root account must not be used directly when using AWS ressources for security purposes. We will later create IAM users to use AWS ressources more safely.
+To connect to aws we use our email and password. We will then access to your root account. The root account must not be used directly when using AWS resources for security purposes. We will later create IAM users to use AWS resources more safely.
 
 <div id='account-console'/></div>
 
@@ -145,9 +145,9 @@ The console allows to search for specific services. by default they are sorted b
 <img src="AWS_CSAA_imgs/console.png" width="400">
 </p>
 
-We notice there is a link for ressource group. Ressource groups allow us to take a collection of aws ressources and assign a tag (a label) to them so we can manage them as a group.
+We notice there is a link for resource group. Resource groups allow us to take a collection of aws resources and assign a tag (a label) to them so we can manage them as a group.
 
-The pushpin is for one-click navigation. It allows us to create shortcuts for most commonly used ressources.
+The pushpin is for one-click navigation. It allows us to create shortcuts for most commonly used resources.
 
 <p align="center">
 <img src="AWS_CSAA_imgs/pushpin.png" width="400">
@@ -159,7 +159,7 @@ The alarm icon allows us to see all system alerts. If we click we will see more 
 <img src="AWS_CSAA_imgs/alerts.png" width="150">
 </p>
 
-Then we have account information and the selected AWS regions we are working on (all ressources are not available for every regions).
+Then we have account information and the selected AWS regions we are working on (all resources are not available for every regions).
 
 Support center allows us to create cases when we encounter problems (we can see support plan here, which will influence aws response time).
 
@@ -175,7 +175,7 @@ We first type `billing` into aws search services bar.
 
 Then we can go in `Billing preferences` section and validate `Receive Free Tier Usage Alerts` (we have to enter an email). We can also set `Receive Billing Alerts` then we have to save preferences. We can now receive billing alerts !
 
-Now we need to go CloudWatch to configure a billing alert. Cloudwatch is the AWS monitoring system use to track performances of used AWS ressources.
+Now we need to go CloudWatch to configure a billing alert. Cloudwatch is the AWS monitoring system use to track performances of used AWS resources.
 
 We go into `CloudWatch` section. We go into the `Alarm/Billing` subsection. Then we can `create alarm`. 
 
@@ -213,7 +213,7 @@ and resources they can use, and how they can use them
 
 We can create an AWS user and allow/restrict access to specific AWS services. 
 
-IAM is not linked to permissions within applications but the ones to access AWS ressources. IAM is a global service, all the access/restrictions are global.
+IAM is not linked to permissions within applications but the ones to access AWS resources. IAM is a global service, all the access/restrictions are global.
 
 The usage of IAM is free !
 
@@ -238,7 +238,7 @@ Their access cannot be limited.
 
 IAM Users are persistent identities set up through the IAM service to represent individual people or applications. They are often used to differenciate admin, dev, test, and production users accesses for applications that need AWS.
 
-Any new user account created are not given access to any AWS ressources. We must explicitely grant persmission to user to give him access to resources.
+Any new user account created are not given access to any AWS resources. We must explicitely grant persmission to user to give him access to resources.
 
 Their access is controled by policies.
 
@@ -253,31 +253,87 @@ Using IAM roles for Amazon EC2 removes the need to store AWS credentials in a co
 
 Their access are controled by limited-in-time policies. 
 
-<div id='iam-setup'/></div>
+###  Amazon resource name
 
-## Initial setup and configuration
+Every resource created on AWS has an Amazon resource name (ARN). The format of ARN consists in : `arn:partition:service:region:account:resource`
+* **partition** : partition the resource is in (most of the time `aws`).
+* **service** : identifies the AWS product. For IAM we will have `iam`.
+* **region** : the region the resource resides in (blank for IAM).
+* **account** : the AWS account ID.
+* **resource** : identifies the resource by name.
 
-AWS best practices allows us to keep a high level of security, accessibility and efficiency. In the IAM panel we can see AWS recommends to do 5 tasks.
+Here is an example of ARN: `arn:aws:iam::796318409053:user/Adrian`
+
+ARN are important part of IAM policies.
+
+Resources are also linked to paths (most of the time `/`) that can be more complicated when matching a company organization. 
+
+<div id='iam-policies'/></div>
+
+## Policies
+
+A policy is a JSON document that fully defines a set of permissions to access and manipulate AWS resources. Policy documents contain one or more permissions, with each
+permission defining :
+* **Sid** : statement identifier
+* **Effect** : a single word (Allow or Deny)
+* **Service** : The service from which the permission apply.
+* **Resource** : The resource value specifies the specific AWS infrastructure for which this
+permission applies. This is specified as an Amazon Resource Name (ARN).
+* **Action** : The action value specifies the subset of actions within a service that the
+permission allows or denies.
+* **Condition** : The condition value optionally defines one or more additional restrictions that limit the actions allowed by the permission.
+
+```
+{
+    "Version": "2012–10–17",
+    "Statement": [
+        {
+            "Sid": "Stmt1441716043000",
+            "Effect": "Allow", <- This policy grants access
+            "Action": [ <- Allows identities to list
+                "s3:GetObject", <- and get objects in
+                "s3:ListBucket" <- the S3 bucket
+            ],
+            "Condition": {
+                "IpAddress": { <- Only from a specific
+                    "aws:SourceIp": "192.168.0.1" <- IP Address
+                }
+            },
+            "Resource": [
+                "arn:aws:s3:::my_public_bucket/*" <- Only this bucket
+            ]
+        }
+    ]
+}
+```
+
+A policy can ba attached to either principals (users, groups, roles) or resources (S3 bucket).
+
+### Identity based policies
+
+`Identity based policies` are policies that can be attached to a principal (or identity), such as IAM userm, group, role. They control the action of that identity, on which resource and under what condition.
+
+They can be categorized in two types:
+* **Managed policies** : standalone identity based policies. They can be AWS managed or customer managed (more precise control). They exists indenpendently from users.They can be managed by AWS or the customer.
+* **Inline policies** : only exists in the context of the resource they are attached to.
+
+Normally, managed policies are used as they can be reused but inline policies can be added to ensure any mistake change in managed policies will not grant access to resources.
+
+### Resource based policies
+
+`Resource based policies` are policies that can be attached to a resource (ex: S3 bucket). They control what actions a specified principal can perform on that resource and under what condition. They are inline policies only.
+
+### Policy evaluation logic
 
 <p align="center">
-<img src="AWS_CSAA_imgs/iam_best_practices.png" width="500">
+<img src="AWS_CSAA_imgs/policy_evaluation.png" width="500">
 </p>
 
-### Multi factor authentication
+<div id='iam-users-groups'/></div>
 
-Multi factor authentication provides another security level on the root acccount. That security is provided by a third-party, it provides a continually changing, random, 6 digit code the we will need to input along with our password when we log in to our root account.
+## Users and Groups
 
-There are two types of MFA devices. The first is a virtual MFA device. It can be a smartphone or a tablet and we use an application like google authentificator to generate the 6-digit code. The second one is an hardware key fob, it's a small physical device with a display we can attach to our keychain. You can get it directly from AWS.
-
-How MFA works ?
-
-When you want to login to an application, after entering the login and password you will have to enter the a MFA code which is sent to the MFA device or to the hardware MFA device. After entering the code, we are logged in to our AWS account.
-
-To set MFA, we click on Manage MFA device with virtual MFA device. Then we have to install an AWS compatible MFA virtual software (authy or google authentificator).
-
-### Create individual IAM users
-
-AWS recommands we don't use our root account for day to day administrative tasks. For that, we are going to create a new IAM user and attach administrative access policy to it. as best practice AWS recommends we give users the minimum access to ressources for users to accomplish their day to day tasks.
+AWS recommands we don't use our root account for day to day administrative tasks. For that, we are going to create a new IAM user and attach administrative access policy to it. as best practice AWS recommends we give users the minimum access to resources for users to accomplish their day to day tasks.
 
 To create a user we go in the dashboard into the `users` section, then `add user`.
 
@@ -310,9 +366,107 @@ The last step is to setup an IAM password policy. It dictates the format and exp
 
 We are going to click on `prevent password reuse` and set the number of passwords to be remembered to 3.
 
+<div id='iam-roles'/></div>
 
+## Roles
 
+A role is intended to be assumable by anyone who needs it (EC2, user, mobile application ...). Roles are like a "superman cape", anyone who has it got the superpowers associated with it (here permissions).
+Roles do not have long term credentials (access key). Instead, when someone asumes a role, a temporary security credential is created dynamically and provided to the user.
 
+We can use role to users, applications or services that don't normally access our AWS ressources. Here are some examples :
+* Users in our AWS account access to resources they do not usually have.
+* Users in one AWS account access to resources in another account.
+* A mobile app to use AWS resources without embedding AWS keys within the app.
+* Users who already have identities defined outside of AWS, such as in our corporate directory
+
+If an EC2 instance, a user and a mobile app want to access a S3 bucket, we should create a role and let them assume that role (instead of creating users).
+
+<p align="center">
+<img src="AWS_CSAA_imgs/iam_roles.png" width="400">
+</p>
+
+### Why roles can be preferred
+
+It allows us to delegate access with defined permissions to trusted entities without having to share long-term access keys.
+
+When EC2 accesses AWS resources such as S3 via IAM, the user's security credentials get stored on that EC2 instance. This should be avoided.
+
+When the same EC2 instance assume a role, its credentials are not stored. This ensures a more secure way of accessing the resource. 
+
+When to prefer roles over users :
+* provide access for services to resources (ex: EC2 to S3)
+* provide access for an IAM user in one AWS account (that we own) to resources in another AWS account (that we own).
+* provide access for externally identified users.
+* provide access to IAM users in AWS accounts owned by third parties.
+
+A `role` is a set of permissions that grant access to actions and resources in AWS. These permissions are attached to the role, not to an IAM user or group.
+
+`AWS service role` is a role that a service assumes to perform actions on our behalf.
+
+`AWS service-linked role` is a role predefined by a service and include all the permissions the service requires to call other AWS services.
+
+`Role chaining` happens when a role (A) grants access to another role (B). Thus you can assume role B through role A.
+
+`Delegation` the granting of permissions to someone to allow access to resources we control.
+
+`Federation` the creation of a trust relation between and external identity provider and AWS.
+
+`Trust policy` is a JSON document which defines who is allowed to assume a role.
+
+`Permission policy` is a JSON document defining the actions and resources a role can use.
+
+`Principal` is an AWS entity that can perform actions and access resources (root account, IAM user or role).
+
+`Role for cross-account access` granting access to resources in one account to a trusted principal in a different account.
+
+### Creating a role
+
+In the role dashboard, we click on create a role. We select EC2 and we attach S3 policy to it. For this example, we give the name "EC2Role".
+
+For our dev group we are going to attach the EC2 and RDS policy.
+
+If we have previously created a role (S3FullAccess) we can attach this role to an EC2 instance at creation time. 
+
+A role is assumed by calling the AWS security token service (STS) AssumeRole APIs (AssumeRole, AssumeRoleWithWebIdentity and AssumeRoleWithSAML). These APIs return a set of temporary security credentials applications can use.
+
+We can assign only one role with an EC2 instance.
+
+A role can be assigned to an already running EC2 instance.
+
+IAM roles do not requests AWS services directly. They have to be assumed by authorized entities such as IAM users, applications or AWS services.
+
+IAM roles are free of charge !
+
+<div id='iam-mfa'/></div>
+
+## Multi factor authentication
+
+Multi factor authentication provides another security level on the root acccount. That security is provided by a third-party, it provides a continually changing, random, 6 digit code the we will need to input along with our password when we log in to our root account.
+
+There are two types of MFA devices. The first is a virtual MFA device. It can be a smartphone or a tablet and we use an application like google authentificator to generate the 6-digit code. The second one is an hardware key fob, it's a small physical device with a display we can attach to our keychain. You can get it directly from AWS.
+
+How MFA works ?
+
+When you want to login to an application, after entering the login and password you will have to enter the a MFA code which is sent to the MFA device or to the hardware MFA device. After entering the code, we are logged in to our AWS account.
+
+To set MFA, we click on Manage MFA device with virtual MFA device. Then we have to install an AWS compatible MFA virtual software (authy or google authentificator).
+
+## Best practices
+
+Here are some of the best practices for IAM :
+* Lock away AWS account root user access keys
+* create individual IAM users
+* configure a strong password policy
+* rotate credentials regularly
+* remove unecessary credentials
+* enable MFA for privileged users
+* use groups to assign permissions to IAM users
+* use AWS defined policies to assign persmissions whenever possible
+* use Policy conditions for extra security
+* grant least privilege
+* use Access levels to reviw IAM permissions
+* use roles to delegate permissions
+* monitor activity in the AWS account
 
 
 
