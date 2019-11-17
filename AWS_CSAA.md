@@ -13,7 +13,8 @@
     3. [Users and Groups](#iam-users-groups)
     4. [Roles](#iam-roles)
     5. [Multi Factor Authentification (MFA)](#iam-mfa)
-3. [end](#iam)
+3. [Simple storage service (S3) and Glacier](#s3)
+4. [end](#iam)
 
 <div id='intro'/></div>
 
@@ -468,13 +469,34 @@ Here are some of the best practices for IAM :
 * use roles to delegate permissions
 * monitor activity in the AWS account
 
+<div id='s3'/></div>
 
+# Simple storage service (S3) and Glacier
 
+Amazon S3 provides developers and IT teams with secure, durable, and highly-scalable cloudstorage. Amazon S3 is easy-to-use object storage with a simple web service interface that youcan use to store and retrieve any amount of data from anywhere on the web. It is characterized by its :
+* **durability** : it is designed to deliver 99.99% durability of objects over a given year.
+* **availibility** : S3 buckets are saved in at least 3 availibility zones.
 
+<p align="center">
+<img src="AWS_CSAA_imgs/availibility_zone.png" width="400">
+</p>
 
+* **scalibility** : bucket sizes will shrink/expand depending on the load.
+* **fast** : multipart upload enables large object uploads.
+* **reliable**
+* **inexpensive** 
 
+Common use cases for Amazon S3 storage include:
+* Backup and archive for on-premises or cloud data
+* Content, media, and software storage and distribution
+* Big data analytics
+* Static website hosting
+* Cloud-native mobile and Internet application hosting
+* Disaster recovery
 
+To support these use cases and many more, Amazon S3 offers a range of storage classesdesigned for various generic use cases: general purpose, infrequent access, and archive.
 
+Amazon Glacier is another cloud storage service related to Amazon S3, but optimized for dataarchiving and long-term backup at extremely low cost. Amazon Glacier is suitable for “colddata,” which is data that is rarely accessed and for which a retrieval time of three to five hoursis acceptable.
 
 
 
