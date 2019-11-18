@@ -13,7 +13,10 @@
     3. [Users and Groups](#iam-users-groups)
     4. [Roles](#iam-roles)
     5. [Multi Factor Authentification (MFA)](#iam-mfa)
-3. [Simple storage service (S3) and Glacier](#s3)
+3. [Simple storage service (S3)](#s3)
+    1. [S3 Bucket Creation](#s3-creation)
+    2. [Versioning](#s3-versioning)
+    3. [Lifecycle](#s3-lifetime)
 4. [end](#iam)
 
 <div id='intro'/></div>
@@ -494,39 +497,176 @@ Common use cases for Amazon S3 storage include:
 * Cloud-native mobile and Internet application hosting
 * Disaster recovery
 
-To support these use cases and many more, Amazon S3 offers a range of storage classesdesigned for various generic use cases: general purpose, infrequent access, and archive.
+To support these use cases and many more, Amazon S3 offers a range of storage classes designed for various generic use cases: general purpose, infrequent access, and archive.
 
-Amazon Glacier is another cloud storage service related to Amazon S3, but optimized for dataarchiving and long-term backup at extremely low cost. Amazon Glacier is suitable for “colddata,” which is data that is rarely accessed and for which a retrieval time of three to five hoursis acceptable.
+With Amazon S3 we don’t have to worry about device or file system storage limits and capacity planning. A single bucket can store an unlimited number of files. You also don’t need to worry about data durability or replication across availability zones.
 
+If we need traditional block or file storage in addition to Amazon S3 storage, AWS provides options. The Amazon EBS service provides block level storage for Amazon Elastic Compute Cloud (Amazon EC2) instances. Amazon Elastic File System (AWS EFS) provides network-attached shared file storage (NAS storage) using the NFS v4 protocol.
 
+## Object vs Traditionnal storage
 
+In traditional IT environments, two kinds of storage dominate: block storage and file storage.
+`Block storage` operates at a lower level, the raw storage device level, and manages data as a
+set of numbered, fixed-size blocks. `File storage` operates at a higher level, the operating system level, and manages data as a named hierarchy of files and folders. Block and file storage are often accessed over a network in the form of a Storage Area Network (SAN) for
+block storage, or as a Network Attached
+Storage (NAS) file server or “filer” for file storage, using protocols such as Common Internet
+File System (CIFS) or Network File System (NFS). Whether directly-attached or network attached, block or file, this kind of storage is very closely associated with the server and the
+operating system that is using the storage.
 
+Amazon S3 object storage is something quite different. Amazon S3 is cloud object storage.
+Instead of being closely associated with a server, Amazon S3 storage is independent of a
+server and is accessed over the Internet. Instead of managing data as blocks or files using
+SCSI, CIFS, or NFS protocols, data is managed as objects using an Application Program
+Interface (API) built on standard HTTP verbs.
 
+<p align="center">
+<img src="AWS_CSAA_imgs/object_block.png" width="400">
+</p>
 
+Object storage :
+* treats the data as an object
+* S3 cannot see the content inside the object
+* S3 have access to the metadata
+* No hierarchy in objets
+* No ability to incrementally increase files
 
+Block storage :
+* data splitted in evenly sized blocks
+* blocks have adresses
+* blocks are distributed among storage nodes
 
+## Buckets
 
+A bucket is a container (web folder) for objects (files) stored in Amazon S3. Every Amazon S3
+object is contained in a bucket. Buckets form the top-level namespace for Amazon S3, and
+bucket names are global. This means that your bucket names must be unique across all AWS
+accounts.
 
+Even though the namespace for Amazon S3 buckets is global, each Amazon S3 bucket is
+created in a specific region that you choose. This lets you control where your data is stored.
 
+## Objects
 
+Objects are the entities or files stored in Amazon S3 buckets. An object can store virtually any kind of data in any format. Objects can range in size from 0 bytes up to 5TB, and a single bucket can store an unlimited number of objects. This means that Amazon S3 can store a
+virtually unlimited amount of data.
 
+Each object consists of data (the file itself) and metadata (data about the file). The data
+portion of an Amazon S3 object is opaque to Amazon S3. This means that an object’s data is
+treated as simply a stream of bytes
 
+The metadata associated with an Amazon S3 object is a set of name/value pairs that describe
+the object. There are two types of metadata: system metadata and user metadata. System
+metadata is created and used by Amazon S3 itself, and it includes things like the date last
+modified, object size, MD5 digest, and HTTP Content-Type. User metadata is optional, and it
+can only be specified at the time an object is created. 
 
+## Keys 
 
+Every object stored in an S3 bucket is identified by a unique identifier called a key. You can think of the key as a filename. A key can be up to 1024 bytes of Unicode UTF-8 characters, including embedded slashes, backslashes, dots, and dashes. Keys must be unique within a single bucket.
 
+## Object URL
 
+Amazon S3 is storage for the Internet, and every Amazon S3 object can be addressed by a
+unique URL formed using the web services endpoint, the bucket name, and the object key.
+For example, with the URL:
 
+http://mybucket.s3.amazonaws.com/jack.doc
 
+mybucket is the S3 bucket name, and jack.doc is the key or filename. If another object is
+created, for instance:
 
+http://mybucket.s3.amazonaws.com/fee/fi/fo/fum/jack.doc
 
+then the bucket name is still mybucket, but now the key or filename is the string
+fee/fi/fo/fum/jack.doc. A key may contain delimiter characters like slashes or backslashes
+to help you name and logically organize your Amazon S3 objects, but to Amazon S3 it is
+simply a long key name in a flat namespace.
 
+## Amazon S3 Operations
 
+The Amazon S3 API is intentionally simple, with only a handful of common operations. They
+include:
+* Create/delete a bucket
+* Write an object
+* Read an object
+* Delete an object
+* List keys in a bucket
 
+The native interface for Amazon S3 is a REST (Representational State Transfer) API. With
+the REST interface, you use standard HTTP or HTTPS (HTTPS is prefered) requests to create and delete buckets, list keys, and read and write objects.
 
+### Endpoints
 
+An `endpoint` is the URL entrypoint for a web service. Most AWS services offer regionnal endpoints.
 
+The endpoint for the S3 REST API is s3.us-east-2-amazonaws.com
 
+## Data consistency
 
+Amazon S3 is an eventually consistent system. Because your data is automatically replicated
+across multiple servers and locations within a region, changes in your data may take some
+time to propagate to all locations. As a result, there are some situations where information
+that you read immediately after an update may return stale data.
+
+Being consistent means if a user performs an action A on an object, the object should be is the most updated state when user B performs an action after (but as replication takes time, it is in an eventually consistent state).
+
+<p align="center">
+<img src="AWS_CSAA_imgs/eventually_consistent.png" width="500">
+</p>
+
+* **PUTS** of the new objects in S3 bucket, S3 is `Read after Write consistent`.
+* **HEAD** or **GET** to the object key name before creating the object, S3 is `eventually Read after Write Consistent`.
+* overwrites **PUTS**, S3 is `Eventually Consistent`.
+* **DELETES**, S3 is `Eventually Consistent`. 
+
+## S3 bucket creation
+
+Into the AWS S3 dashboard we can create, detete and empty a bucket. A bucket is just a container that holds the objects uploaded to S3.
+
+If we want to create a bucket we have to follow certain rules (bucket names must be unique, they must not be formatted as an IP).
+
+Buckets are private by default and associated with a region.
+
+When clicking to a bucket we see panels : overview, properties, permissions, management. We can create a folder (displayed as a folder but seen for AWS as a filename).
+
+<p align="center">
+<img src="AWS_CSAA_imgs/s3_files.png" width="500">
+</p>
+
+We can see the properties of a file by clicking on it.
+
+<p align="center">
+<img src="AWS_CSAA_imgs/s3_file_property.png" width="300">
+</p>
+
+Permissions linked to the file can be changed in the permission panel (otherwise the cannot be accessed).
+
+## Versioning 
+
+Versionning allows us to keep different versions of an object in the same bucket.
+
+Versionning-enabled buckets allows us to recover objects from accidental deletion or overwrite.
+* Upon deletion, intstead of removing it, it hides the object.
+* If you overwrite an object, it results in creating a new object in the same bucket.
+
+States of the buckets :
+* Un-versioned (default)
+* Versioning-Enabled
+* Versioning-Suspended
+
+Once enabled, the versioning can only be suspended, the bucket cannot be un-versioned back (get NULL as version ID for objects).
+
+The versioning state applies to all object in the bucket. Once versioning is enabled, all the subsequent added/modified objects are versioned and given an unique version ID.
+
+The version shown is the latest version.
+
+To delete a version of the object, you need to do so by using its version ID.
+
+If versioning is enabled on a bucket that already has objects in it, the objects would have null as version ID.
+
+Suspending versioning on buckets that already has some objects in it will set object version to null.
+
+## Server Access logging and Object-level logging
 
 
 
