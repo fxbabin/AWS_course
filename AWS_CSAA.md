@@ -668,21 +668,118 @@ Suspending versioning on buckets that already has some objects in it will set ob
 
 ## Server Access logging and Object-level logging
 
+Provides a detailed record for the requests that are made to a bucket (source bucket). They are utils for security and access auditing (it is disabled by default).
+
+Source and target buckets could be in the same region. We need to grant the Amazon S3 Log Delivery group write permission on the target bucket.
+
+Provides access log record provides following information about single access request :
+* Name of the bucket which was accessed (source bucket)
+* Requester
+* Request time
+* Request action
+* Request status
+* Error status (if any)
+
+It is possible to dump the logs of multiple source buckets in a single target bucket.
+
+<p align="center">
+<img src="AWS_CSAA_imgs/log_bucket.png" width="300">
+</p>
+
+In AWS, if we want to setup logging we must go in s3, select a bucket and go in the properties panel. There we can enable logging (we must select a target bucket that can be the same as the source bucket).
+
+Prefix is an optionnal field. Generation of the server logs can take time (up to several hours). If we upload objects to the bucket and see the generated logs.
+
+Logs contain : 
+* owner ID
+* bucket nane
+* ip address of the machine
+* id of requester
+* requester time
+* requester action
+* request status 
+
+Logging will happen at the object level (with Cloudtrail). Cloudtrail helps us audit the activity on the ressources on our account.
+
+<p align="center">
+<img src="AWS_CSAA_imgs/log_cloudtrail.png" width="300">
+</p>
+
+The trail must be created in the same region as the one of the bucket.
+
+<p align="center">
+<img src="AWS_CSAA_imgs/cloudtrail_create.png" width="500">
+</p>
+
+## Static Web Hosting
+
+In the following example we have two web pages (index.html and error.html).
+
+<p align="center">
+<img src="AWS_CSAA_imgs/static_web_hosting.png" width="500">
+</p>
+
+In order to host it we have to create the two files and upload them to S3. After we have selected the two files, we go in properties and static web hosting and we are going to indicate in the bucket, the index and error files. The two objects need to be made public.
+
+## S3 Encryption
+
+It is strongly recommended that all sensitive data stored in Amazon S3 be encrypted, both in flight and at rest.
+
+To encrypt your Amazon S3 data in flight, you can use the Amazon S3 Secure Sockets Layer (SSL) API endpoints. This ensures that all data sent to and from Amazon S3 is encrypted while in transit using the HTTPS protocol.
+To encrypt your Amazon S3 data at rest, you can use several variations of Server-Side Encryption (SSE). Amazon S3 encrypts your data at the object level as it writes it to disks in its data centers and decrypts it for you when you access it.
+
+Encryption can be on the server side (only one per object) or on the client side. Encryption and decryption is done on S3
+
+### Server Side Encryption with Amazon S3 (SSE-S3)
+
+Creating and managing of the encryption keys is done by S3. 
+
+<p align="center">
+<img src="AWS_CSAA_imgs/s3_encryption.png" width="500">
+</p>
 
 
+### SSE with AWS Key Management Service (SSE-KMS)
 
+<p align="center">
+<img src="AWS_CSAA_imgs/key_management_service.png" width="500">
+</p>
 
+### SSE with Customer Provided Keys (SSE-C)
 
+Creating and managing of the encryption keys is done by customer. It allows to handle additionnal safeguards. To retrieve the object, customer must provide the same encryption key.
 
+<p align="center">
+<img src="AWS_CSAA_imgs/s3_sse_c.png" width="500">
+</p>
 
+### Client Side Encryption with KMS-Managed Customer Master Key(CSE)
 
+First the user ask the KMS to give him a key. AWS KMS returns two versions of the randomly generated key (plain text version and a cipherblob). The client uses the plain text version to encrypt data and store them into the bucket. It also uploads the cipherblob as a metadata in the S3 bucket.
 
+When the client tries to download the data, the object and the cipher are retrieved. The cipher is then send to AWS KMS which gives back to the client the plain key. Finally, the plain key can be used to decrypt the file.
 
+<p align="center">
+<img src="AWS_CSAA_imgs/s3_client_encryption.png" width="500">
+</p>
 
+It is customer responsability to safely manage the encryption keys. If keys are lost, the customer won't be able to decrypt the data.
 
+### CSE with Client-side Master Key
 
+For uploading the customer first provide the masterkey to the Amazon S3 encryption client. The s3 Encrytion client generates the encryption key then encrypts the key itself with the provided client masterkey. It then encrypts the data and save the data and encrypted key as part of the metadata.
 
+While downloading, the s3 encryption client download the encrypted object and using the client provided masterkey it decrypts the encryption key then the data.
 
+<p align="center">
+<img src="AWS_CSAA_imgs/cse_mk.png" width="450">
+</p>
 
+## Tags, Transfer Acceleration and Multipart Upload
 
+A tag is a way to label the AWS resources, such they can be easily managed, searched for, and filtered easily. Tags basically includes a [key: value] pair. Tagging is not S3 specific, it can be applied by other AWS services.
 
+Transfer acceleration enables fast, easy, and secure transfers of files over long distances between your client and an S3 bucket.
+It can upload the objects over long distances in an accelerated speedy manner.
+
+Multipart upload enables to upload large objects in parts for fast and efficient data transfer.
