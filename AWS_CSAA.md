@@ -16,7 +16,10 @@
 3. [Simple storage service (S3)](#s3)
     1. [S3 Bucket Creation](#s3-creation)
     2. [Versioning](#s3-versioning)
-    3. [Lifecycle](#s3-lifetime)
+    3. [Logging](#s3-logging)
+    4. [Encryption](#s3-encryption)
+    5. [Tags, Transfer Acceleration and Multipart Upload](#s3-tags)
+    6. [Permissions, ACLs](#s3-perms)
 4. [end](#iam)
 
 <div id='intro'/></div>
@@ -222,6 +225,10 @@ IAM is not linked to permissions within applications but the ones to access AWS 
 The usage of IAM is free !
 
 <div id='iam-principals'/></div>
+
+### Access keys 
+
+Access keys consist of two parts: an access key ID (for example, AKIAIOSFODNN7EXAMPLE) and a secret access key (for example, wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY). You use access keys to sign programmatic requests that you make to AWS if you use AWS CLI commands (using the SDKs) or using AWS API operations.
 
 ## Principals
 
@@ -619,6 +626,8 @@ Being consistent means if a user performs an action A on an object, the object s
 * overwrites **PUTS**, S3 is `Eventually Consistent`.
 * **DELETES**, S3 is `Eventually Consistent`. 
 
+<div id='s3-creation'/></div>
+
 ## S3 bucket creation
 
 Into the AWS S3 dashboard we can create, detete and empty a bucket. A bucket is just a container that holds the objects uploaded to S3.
@@ -640,6 +649,8 @@ We can see the properties of a file by clicking on it.
 </p>
 
 Permissions linked to the file can be changed in the permission panel (otherwise the cannot be accessed).
+
+<div id='s3-versioning'/></div>
 
 ## Versioning 
 
@@ -665,6 +676,8 @@ To delete a version of the object, you need to do so by using its version ID.
 If versioning is enabled on a bucket that already has objects in it, the objects would have null as version ID.
 
 Suspending versioning on buckets that already has some objects in it will set object version to null.
+
+<div id='s3-logging'/></div>
 
 ## Server Access logging and Object-level logging
 
@@ -721,6 +734,8 @@ In the following example we have two web pages (index.html and error.html).
 
 In order to host it we have to create the two files and upload them to S3. After we have selected the two files, we go in properties and static web hosting and we are going to indicate in the bucket, the index and error files. The two objects need to be made public.
 
+<div id='s3-encryption'/></div>
+
 ## S3 Encryption
 
 It is strongly recommended that all sensitive data stored in Amazon S3 be encrypted, both in flight and at rest.
@@ -775,6 +790,8 @@ While downloading, the s3 encryption client download the encrypted object and us
 <img src="AWS_CSAA_imgs/cse_mk.png" width="450">
 </p>
 
+<div id='s3-tags'/></div>
+
 ## Tags, Transfer Acceleration and Multipart Upload
 
 ### Tags
@@ -820,3 +837,44 @@ Multipart upload is divided into three steps :
 * Initiation
 * Upload
 * Completion (or Abort)
+
+<p align="center">
+<img src="AWS_CSAA_imgs/multipart_upload.png" width="500">
+</p>
+
+## Events
+
+Events allows us to send notifications when certain events happen in our bucket (we can get notified when objects are uploaded, updated, deleted).
+
+The user get notified via SNS Topic, publish the event to SQS queue (Simple Queue Service), or run some code in response to the event via AWS Lambda function.
+
+First we create an SNS topic which is like a coomunication center or channel to which the publisher sends a message. Here, S3 will be the publisher of the message. Then we configure the receivers or suscribers which receives the message when published.
+We can configure an email ID, which will receive the message.
+
+<p align="center">
+<img src="AWS_CSAA_imgs/sns_events.png" width="500">
+</p>
+
+In order to do that, we are first going to create an SNS topic on AWS console. Then we need to create a subscription (to add subscribers). We need to enter the user ID as an endpoint and confirm the subscription by mail. We have to authorize access to the created topic (could not find correct option).
+
+<p align="center">
+<img src="AWS_CSAA_imgs/sns_creation.png" width="400">
+</p>
+
+Then we go in S3, click on the bucket and go in events to add an event.
+
+<p align="center">
+<img src="AWS_CSAA_imgs/event_creation.png" width="400">
+</p>
+
+## Requester Pays
+
+S3 charges by the storage space consumed by the owner as data transfered by the user. The owner of the bucket bares all the cost. The application using objects does not have to pay anything.
+
+With a requester pays option, the requester pays for the cost of the request and the data downloaded from the bucket. The bucket owner just pays for the storage.
+
+It can be used if you host the data but make the customer pay for downloading the data.
+
+We must authenticate all requests involving requester pays buckets. after configuration, the requesters must includee x-amz-request-payer in their requests either in the header (for POST/GET/HEAD requests), or as parameter (REST).
+
+## 
