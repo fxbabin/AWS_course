@@ -777,9 +777,46 @@ While downloading, the s3 encryption client download the encrypted object and us
 
 ## Tags, Transfer Acceleration and Multipart Upload
 
-A tag is a way to label the AWS resources, such they can be easily managed, searched for, and filtered easily. Tags basically includes a [key: value] pair. Tagging is not S3 specific, it can be applied by other AWS services.
+### Tags
+
+A `tag` is a way to label the AWS resources, such they can be easily managed, searched for, and filtered easily. Tags basically includes a [key: value] pair. Tagging is not S3 specific, it can be applied by other AWS services.
+
+Tags are a great way to organize AWS resources. It allow to group, search and filter resources.
+
+AWS cost explorer and detailled billing has the ability to gather costs by tag (ex: cost of resources grouped by department).
+
+It is also possible to filter resources for automation activities (we may tag EC2 instances as "development", "testing", "production").
+
+IAM policies support tag-based conditions (specify permissions in EC2 for "development", "testing", "production").
+
+A `tag set` contains all of the tags that are assigned to that bucket. A tag set can contain as many as 10 tags (or be empty). Keys must be unique but not values.
+
+### Transfer Acceleration
 
 Transfer acceleration enables fast, easy, and secure transfers of files over long distances between your client and an S3 bucket.
 It can upload the objects over long distances in an accelerated speedy manner.
 
+It allows an upload to a centralize bucket from all over the world (gather uploads in a central place).
+
+Transfer Acceleration utilizes CloudFront globally distributed edge locations.
+
+Edge locations are high availibility servers around the globe. These are linked with direct lines for tranfer. Their job is to distribute content from an origin to a destination as fast as possible.
+
+<p align="center">
+<img src="AWS_CSAA_imgs/edge_locations.png" width="450">
+</p>
+
+A speed comparison tool allows us to see the gain in time for uploads with acceleration.
+
+Transfer acceleration may implie more charges.
+
+### Multipart Upload
+
 Multipart upload enables to upload large objects in parts for fast and efficient data transfer.
+
+In general when an object size reaches 100 Mb, we should consider using multipart upload.
+
+Multipart upload is divided into three steps :
+* Initiation
+* Upload
+* Completion (or Abort)
