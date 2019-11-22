@@ -92,13 +92,15 @@ AWS has some interesting proporties as :
 AWS provides a highly available technology infrastructure platform with multiple locations
 worldwide. These locations are composed of `regions` and `availability zones`. 
 
-Each region is a separate geographic area. Each region has multiple, isolated locations known as availability zones. An availibity zone is a physical data center geographically seperated from other availibility zones.
+Each region is a separate geographic area. Each region has multiple, isolated locations known as availability zones. An availibity zone is a physical data center geographically seperated from other availibility zones (redundant power, networking and connectivity).
 
 <p align="center">
 <img src="AWS_CSAA_imgs/aws_regions.png" width="300">
 </p>
 
-We can achieve high availability by deploying your application across multiple availability zones. 
+We can achieve high availability by deploying your application across multiple availability zones.
+
+`Edge locations` are endpoints for AWS which are used for `caching content` (performance optimization mechanism in which data is delivered from the closest servers for optimal application performance). Typically consists of CloudFront (Amazon's content delivery network (CDN)).
 
 ### Security
 
@@ -877,4 +879,17 @@ It can be used if you host the data but make the customer pay for downloading th
 
 We must authenticate all requests involving requester pays buckets. after configuration, the requesters must includee x-amz-request-payer in their requests either in the header (for POST/GET/HEAD requests), or as parameter (REST).
 
-## 
+## Permissions Access Control List and Bucket Policy
+
+Amazon S3 is secure by default; when you create a bucket or object in Amazon S3, only you have access. To allow you to give controlled access to others, Amazon S3 provides both coarse-grained access controls (Amazon S3 Access Control Lists [ACLs]), and fine-grained access controls (Amazon S3 bucket policies, AWS Identity and Access Management [IAM]
+policies, and query-string authentication).
+
+Amazon S3 ACLs allow you to grant certain coarse-grained permissions: READ, WRITE, or FULL-CONTROL at the object or bucket level. ACLs are a legacy access control mechanism,
+created before IAM existed. ACLs are best used today for a limited set of use cases, such as enabling bucket logging or making a bucket that hosts a static website be world-readable.
+
+Amazon S3 bucket policies are the recommended access control mechanism for Amazon S3 and provide much finer-grained control. Amazon S3 bucket policies are very similar to IAM policies, 
+but are subtly different in that:
+* They are associated with the bucket resource instead of an IAM principal.
+* They include an explicit reference to the IAM principal in the policy. This principal can
+be associated with a different AWS account, so Amazon S3 bucket policies allow you to
+assign cross-account access to Amazon S3 resources.
