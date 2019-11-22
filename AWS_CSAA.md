@@ -893,3 +893,4 @@ but are subtly different in that:
 * They include an explicit reference to the IAM principal in the policy. This principal can
 be associated with a different AWS account, so Amazon S3 bucket policies allow you to
 assign cross-account access to Amazon S3 resources.
+
